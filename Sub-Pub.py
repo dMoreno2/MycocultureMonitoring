@@ -16,14 +16,12 @@ _ard_Serial=serial.Serial("/dev/rfcomm0", 9600)
 def on_connect(client, userdata, flags, rc): # func for making connection
     print("Connected to MQTT")
     print("Connection return result: " +str(rc))
-    client.subscribe([("Air Humidity",0),("Celsius Temperature",0),("Soil Humidity",0),("Light Level",0)])
+    client.subscribe([("Air Humidity",0),("Celsius Temperature",0),("Soil Humidity",0),("Light Level",0),("CO2 Level",0)])
 
 def PublishLoop():
     global waitingForStart
     global messaging
     global _ard_Serial
-    #_ard_Serial.write(str.encode('Restart'))
-    #_ard_Serial.write(str.encode('Start'))
     while messaging:
         while waitingForStart:
             _ard_Serial.write(str.encode('Start'))
@@ -53,7 +51,7 @@ def PublishLoop():
         #Publish numbers to topics.
         publish.single("Air Humidity", (float(airHumidity[1])), hostname="localhost")
         publish.single("Celsius Temperature", (float(tempC[1])), hostname="localhost")
-        publish.single("Co2 Level", (float(co2[1])), hostname="localhost")
+        publish.single("CO2 Level", (float(co2[1])), hostname="localhost")
         publish.single("Soil Humidity", (float(soilHumidity[1])), hostname="localhost")
         publish.single("Light Level", (float(lum[1])), hostname="localhost")
         waitingForStart = True
@@ -98,7 +96,7 @@ def on_message(client, userdata, msg): # Func for sending msg
             message_Queue.append('Low Light')
             
     time.sleep(0.1)
-    if str(msg.topic)==str("CO2"):
+    if str(msg.topic)==str("CO2 Level"):
         if float(msg.payload)>=float(50):
             #print("Light level is high!")
             message_Queue.append('High CO2')
@@ -118,7 +116,7 @@ def MessageOut():
         time.sleep(4)
     _ard_Serial.write(str.encode('Restart'))
     time.sleep(2)
-    print('ReStart')
+    print('Restarting')
         
 def OnKeyExit():
     global messaging
