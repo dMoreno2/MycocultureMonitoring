@@ -6,11 +6,16 @@ import time
 import string
 import sys
 
+broker=""
+port=443
+name=""
+secret=""
+
 messaging = True
 waitingForStart = True
 message_Queue= []
 
-_ard_Serial=serial.Serial("/dev/rfcomm0", 9600)
+_ard_Serial=serial.Serial("/dev/rfcomm1", 9600)
 #_ard_Serial.write(str.encode('Restart'))
 
 def on_connect(client, userdata, flags, rc): # func for making connection
@@ -22,6 +27,8 @@ def PublishLoop():
     global waitingForStart
     global messaging
     global _ard_Serial
+    #_ard_Serial.write(str.encode('Restart'))
+    #_ard_Serial.write(str.encode('Start'))
     while messaging:
         while waitingForStart:
             _ard_Serial.write(str.encode('Start'))
@@ -49,12 +56,21 @@ def PublishLoop():
         lum = x[4].split('=')
 
         #Publish numbers to topics.
-        publish.single("Air Humidity", (float(airHumidity[1])), hostname="localhost")
-        publish.single("Celsius Temperature", (float(tempC[1])), hostname="localhost")
-        publish.single("CO2 Level", (float(co2[1])), hostname="localhost")
-        publish.single("Soil Humidity", (float(soilHumidity[1])), hostname="localhost")
-        publish.single("Light Level", (float(lum[1])), hostname="localhost")
+        _ard_one_client.publish("CSV",encodedSerial)
+        _ard_one_client.publish("Air Humidity", (float(airHumidity[1])))
+        _ard_one_client.publish("Celsius Temperature", (float(tempC[1])))
+        _ard_one_client.publish("CO2 Level", (float(co2[1])))
+        _ard_one_client.publish("Soil Humidity", (float(soilHumidity[1])))
+        _ard_one_client.publish("Light Level", (float(lum[1])))
+        #Publish numbers to topics.
+#         publish.single("CSV",encodedSerial,hostname=broker)
+#         publish.single("Air Humidity", (float(airHumidity[1])), hostname=broker)
+#         publish.single("Celsius Temperature", (float(tempC[1])), hostname=broker)
+#         publish.single("CO2 Level", (float(co2[1])), hostname=broker)
+#         publish.single("Soil Humidity", (float(soilHumidity[1])), hostname=broker)
+#         publish.single("Light Level", (float(lum[1])), hostname=broker)
         waitingForStart = True
+        time.sleep(4)
         MessageOut()
 
 def on_message(client, userdata, msg): # Func for sending msg
@@ -116,7 +132,7 @@ def MessageOut():
         time.sleep(4)
     _ard_Serial.write(str.encode('Restart'))
     time.sleep(2)
-    print('Restarting')
+    print('ReStart')
         
 def OnKeyExit():
     global messaging
@@ -131,6 +147,7 @@ def OnKeyExit():
             exit()
 
 _ard_one_client = mqtt.Client()
+_ard_one_client.username_pw_set(username=name,password=secret)
 
 publishThread = thread.Thread(target = PublishLoop)
 publishThread.start()
@@ -141,7 +158,7 @@ exitThread.start()
 try:
     _ard_one_client.on_connect = on_connect
     _ard_one_client.on_message = on_message
-    _ard_one_client.connect("localhost", 1883, 60)
+    _ard_one_client.connect(broker, port)
     _ard_one_client.loop_forever()
 except:
     print("Error Connecting")
