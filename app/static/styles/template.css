@@ -1,0 +1,108 @@
+@font-face {
+  font-family: "Open Sans";
+  src: url('/static/styles/OpenSans-Light.ttf') format("ttf"),
+       url('/static/styles/OpenSans-Medium.ttf') format("ttf");
+}
+
+/* Tag Styles */
+body {
+  padding: 30px;
+
+  font-family: "Open Sans", sans-serif;
+  color: #351103;
+
+  background-color: #ECE4D2;
+}
+main {
+  margin: 0 auto;
+  max-width: 1040px;
+}
+
+h1 {
+  color: #501904;
+  font-size: 2.1em;
+}
+
+h4 {
+  margin: 13px 0;
+}
+
+p {
+  font-size: 0.8em;
+}
+
+a {
+  color: #852b08;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+/* Background */
+.backgroundLayer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  background-image: url('/static/styles/mushroom-bk.jpg');
+  background-size: 250px;
+  opacity: 0.15;
+}
+
+header {
+  position: relative;
+
+  margin: 0 auto 40px;
+  max-width: 1040px;
+
+  text-align: center;
+}
+
+/* Date/Time */
+.dateTime {
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  text-align: right;
+}
+
+.dateTime li {
+  font-size: 16px;
+  font-weight: 800;
+  margin-bottom: 2px;
+}
+
+/* Stats */
+.growStats {
+  display: flex;
+  justify-content: space-between;
+}
+
+.growStats .dataBlock {
+  width: calc(25% - 60px);
+}
+
+.dataBlock {
+  padding: 25px;
+
+  color: #E8E0CF;
+
+  background-color: rgba(75, 17, 3, 0.7);
+  border-radius: 5px;
+}
+
+/* Footer */
+.footerBar {
+  position: fixed;
+  bottom: 35px;
+  left: 35px;
+
+  display: block;
+}
