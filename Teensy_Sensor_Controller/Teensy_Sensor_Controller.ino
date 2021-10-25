@@ -1,4 +1,3 @@
-#include "DHT.h"
 #include <Arduino.h>
 #include <SensirionI2CScd4x.h>
 #include <Wire.h>
@@ -11,16 +10,14 @@
 #define photoResistor A2
 
 //Air humidity and heat
-#define DHTPIN 21      // Digital pin connected to the DHT sensor
-#define DHTTYPE DHT11   // DHT 11
 #define LEDPIN 11
-DHT dht(DHTPIN, DHTTYPE);
 SensirionI2CScd4x scd4x;
 
 //Define LED pins.
 #define blue 3
 #define yellow 1
 #define red 0
+#define green 4
 
 //RX and TX pins
 #define rxPin 7
@@ -29,8 +26,21 @@ SensirionI2CScd4x scd4x;
 bool waitingToStart = true;
 
 //String value;
-String codes[10] = {"Low Air", "High Air", "Low Soil", "High Soil", "Low Light", "High Light","Low Temp","High Temp","Low CO2","High CO2"};
+String codes[10] = {"Low Air", "High Air", "Low Soil", "High Soil", "Low Light", "High Light", "Low Temp", "High Temp", "Low CO2", "High CO2"};
 int lengthOfCodesArray = 10;
+
+unsigned long startMillis;  //some global variables available anywhere in the program
+unsigned long currentMillis;
+const unsigned long period = 40000;
+
+bool flashYellow = false;
+bool flashRed = false;
+bool flashBlue = false;
+bool flashGreen = false;
+bool yellowOn = false;
+bool redOn = false;
+bool blueOn = false;
+bool greenOn = false;
 
 void setup()
 {
@@ -48,13 +58,37 @@ void setup()
   pinMode (blue, OUTPUT);
   pinMode (yellow, OUTPUT);
   pinMode (red, OUTPUT);
-
-  // Setup DHT Sensor
-  pinMode(DHTPIN, INPUT);
-  dht.begin();
+  pinMode (green, OUTPUT);
 }
 
 void loop()
+{
+    sensorDataOut();
+    delay(100);
+    startMillis = millis();
+    while (waitingToStart)
+    {
+        currentMillis = millis();  //get the current "time" (actually the number of milliseconds since the program started)
+        if (currentMillis - startMillis >= period)  //test whether the period has elapsed
+        {
+          waitingToStart = false;
+        }
+        
+        lightFlasher();
+    }
+    
+    flashYellow = false;
+    flashRed = false;
+    flashBlue = false;
+    flashGreen = false;
+    yellowOn = false;
+    redOn = false;
+    blueOn = false;
+    greenOn = false;
+    waitingToStart = true;
+}
+
+void sensorDataOut()
 {
   String startCommand = "Words";
   while (waitingToStart == true)
@@ -69,7 +103,7 @@ void loop()
       }
     }
   }
-  
+
   String messageText;
   //Powers the sensors
   digitalWrite(LEDPIN, HIGH); ///could be placed at the bottom to turn off the sensor after data has been collected.
@@ -80,10 +114,6 @@ void loop()
 
   //Reads/holds photoresistor data
   float lumStatus = analogRead(photoResistor);
-
-  //Reads/holds humidity and temperature data and converts heat data between fahrenheit and celsius
-  float h = dht.readHumidity();
-  float t = dht.readTemperature();
 
   uint16_t co2;
   float temperature;
@@ -123,50 +153,107 @@ void loop()
   }
   Serial.println("Restarting");
   waitingToStart = true;
-  delay(600000);
 }
 
 void LightChanger(int indexValue)
-{
-  if (indexValue == 0) {
-    digitalWrite(red, LOW);
+{ if (indexValue == 0) {
+    //digitalWrite(blue, LOW);
     //low air
   }
   else if (indexValue == 1) {
-    digitalWrite(red, HIGH);
-    //high air
+    //digitalWrite(blue, HIGH);
+    //hgih air
   }
   else if (indexValue == 2) {
-    digitalWrite(blue, LOW);
+    //digitalWrite(blue, LOW);
     //low soil
   }
   else if (indexValue == 3) {
-    digitalWrite(blue, HIGH);
+    //digitalWrite(blue, HIGH);
     //high soil
   }
   else if (indexValue == 4) {
-    digitalWrite(yellow, LOW);
+    //digitalWrite(yellow, LOW);
     //low light
+    flashYellow = true;
   }
   else if (indexValue == 5) {
-    digitalWrite(yellow, HIGH);
+    //digitalWrite(yellow, HIGH);
     //high light
+    yellowOn = true;
   }
+
   else if (indexValue == 6) {
-    digitalWrite(yellow, LOW);
+    //digitalWrite(red, LOW);
     //low temp
+    flashRed = true;
   }
   else if (indexValue == 7) {
-    digitalWrite(yellow, HIGH);
+    //digitalWrite(red, HIGH);
     //high temp
+    redOn = true;
   }
   else if (indexValue == 8) {
-    digitalWrite(yellow, LOW);
+    //digitalWrite(green, LOW);
     //low co2
+    flashGreen = true;
   }
   else if (indexValue == 9) {
-    digitalWrite(yellow, HIGH);
+    //digitalWrite(green, HIGH);
     //high co2
+    greenOn = true;
   }
   Serial.println("Value Running " + codes[indexValue]);
+}
+
+void lightFlasher()
+{
+  if (flashYellow)
+  {
+    //low light
+    digitalWrite(yellow, HIGH);
+    delay(300);
+    digitalWrite(yellow, LOW);
+  }
+  if (flashRed)
+  {
+    //low temp
+    digitalWrite(red, HIGH);
+    delay(300);
+    digitalWrite(red, LOW);
+  }
+  if (flashBlue)
+  {
+    //UNSURE
+    digitalWrite(blue, HIGH);
+    delay(300);
+    digitalWrite(blue, LOW);
+  }
+  if (flashGreen)
+  {
+    //low co2
+    digitalWrite(green, HIGH);
+    delay(300);
+    digitalWrite(green, LOW);
+  }
+  if (yellowOn)
+  {
+    //high light
+    digitalWrite(yellow, HIGH);
+  }
+  if (redOn)
+  {
+    // high temp
+    digitalWrite(red, HIGH);
+  }
+  if (blueOn)
+  {
+    //UNSURE
+    digitalWrite(blue, HIGH);
+  }
+  if (greenOn)
+  {
+    //high co2
+    digitalWrite(green, HIGH);
+  }
 }
