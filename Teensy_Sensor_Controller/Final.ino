@@ -1,4 +1,3 @@
-#include "DHT.h"
 #include <Arduino.h>
 #include <SensirionI2CScd4x.h>
 #include <Wire.h>
@@ -11,10 +10,7 @@
 #define photoResistor A2
 
 //Air humidity and heat
-#define DHTPIN 21      // Digital pin connected to the DHT sensor
-#define DHTTYPE DHT11   // DHT 11
 #define LEDPIN 11
-DHT dht(DHTPIN, DHTTYPE);
 SensirionI2CScd4x scd4x;
 
 //Define LED pins.
@@ -33,6 +29,8 @@ bool waitingToStart = true;
 String codes[10] = {"Low Air", "High Air", "Low Soil", "High Soil", "Low Light", "High Light", "Low Temp", "High Temp", "Low CO2", "High CO2"};
 int lengthOfCodesArray = 10;
 
+int timeInterval=40000;
+
 bool flashYellow = false;
 bool flashRed = false;
 bool flashBlue = false;
@@ -41,7 +39,6 @@ bool yellowOn = false;
 bool redOn = false;
 bool blueOn = false;
 bool greenOn = false;
-
 
 void setup()
 {
@@ -59,10 +56,29 @@ void setup()
   pinMode (blue, OUTPUT);
   pinMode (yellow, OUTPUT);
   pinMode (red, OUTPUT);
+  pinMode (green, OUTPUT);
+}
 
-  // Setup DHT Sensor
-  pinMode(DHTPIN, INPUT);
-  dht.begin();
+void loop()
+{
+    sensorDataOut();
+    delay(100);
+    int startTime = millis();
+    int currentTime;
+    while ((currentTime - startTime )< timeInterval)
+    {
+        currentTime = millis();
+        lightFlasher();
+    }
+    
+    flashYellow = false;
+    flashRed = false;
+    flashBlue = false;
+    flashGreen = false;
+    yellowOn = false;
+    redOn = false;
+    blueOn = false;
+    greenOn = false;
 }
 
 void sensorDataOut()
@@ -91,10 +107,6 @@ void sensorDataOut()
 
   //Reads/holds photoresistor data
   float lumStatus = analogRead(photoResistor);
-
-  //Reads/holds humidity and temperature data and converts heat data between fahrenheit and celsius
-  float h = dht.readHumidity();
-  float t = dht.readTemperature();
 
   uint16_t co2;
   float temperature;
@@ -237,25 +249,4 @@ void lightFlasher()
     //high co2
     digitalWrite(green, HIGH);
   }
-}
-
-void loop()
-{
-    sensorDataOUT();
-
-    startTime = millis();
-    while (currentTime - startTime < timeInterval)
-    {
-        currentTime = millis();
-        lightFlasher();
-    }
-    
-    flashYellow = false;
-    flashRed = false;
-    flashBlue = false;
-    flashGreen = false;
-    yellowOn = false;
-    redOn = false;
-    blueOn = false;
-    greenOn = false;
 }
