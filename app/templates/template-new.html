@@ -1,0 +1,48 @@
+<!DOCTYPE html style=>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" http-equiv="refresh" content="30">                
+    
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/template.css') }}">
+  </head>
+
+  <body>
+    <div class="backgroundLayer"></div>
+
+    <header>
+      <h1>Mushroom Dashboard</h1>
+      <ul class="dateTime">
+        <li>{{ time }}</li>
+      </ul>
+    </header>
+
+    <main>
+      <ul class="growStats">
+        <li class="dataBlock" id="card" name="temp">
+          <h4>Temperature</h4>
+            <p>{{ temp }}°C</p>
+        </li>
+        <li class="dataBlock" id="card" name="lumin">
+          <h4>Soil Humidity</h4>
+          <p>{{ shumid }}</p>
+        </li>
+        <li class="dataBlock" id="card" name="humid">
+          <h4>Air Humidity</h4>
+          <p>{{ ahumid }}</p>
+        </li>
+        <li class="dataBlock" id="card" name="co2">
+          <h4>CO2 Level</h4>
+          <p>{{ co2 }} ppm</p>
+        </li>
+        <li class="dataBlock" id="card" name="lumin">
+          <h4>Luminescence</h4>
+          <p>{{ light }}</p>
+        </li>
+      </ul>
+    </main>
+
+    <footer class="footerBar">
+      <a href="https://github.com/dMoreno2/MycocultureMonitoring.git" rel="noopener noreferrer" target="_blank">Please vist this project on github</a>
+    </footer>
+  </body>
+</html>
